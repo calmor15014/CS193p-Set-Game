@@ -8,14 +8,17 @@
 import SwiftUI
 
 struct ContentView: View {
+    var viewmodel: SetGame
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+        Grid(viewmodel.onScreenCards) {
+            SetCardView(card: $0.content)
+        }
     }
 }
 
+
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView(viewmodel: SetGame())
     }
 }
