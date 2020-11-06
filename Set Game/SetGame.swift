@@ -8,67 +8,33 @@
 import SwiftUI
 
 class SetGame: ObservableObject {
-    private var model: SetGameModel<SetCard>
-    
+    @Published private var model: SetGameModel
+
+    // MARK: - Properties
     var numberOfCards: Int {
         get {
             return model.cards.count
         }
     }
     
-    var cards: Array<SetGameModel<SetCard>.Card> {
-        model.cards
-    }
-    
-    var onScreenCards: Array<SetGameModel<SetCard>.Card> {
-        model.cards.filter {
-            $0.isDisplayed
+    var cardsOnScreen: Array<SetGameModel.Card> {
+        model.cards.filter { card in
+            card.isDisplayed
         }
     }
     
     init() {
-        let numberOfShapes = 3
-        var cards = Array<SetCard>()
-        for count in 1...numberOfShapes {
-            for style in SetCard.ShapeStyles.allCases {
-                for shade in SetCard.ShapeShadings.allCases {
-                    for color in SetCard.ShapeColors.allCases {
-                        cards.append(SetCard(numberOfShapes: count, shapeStyle: style, shapeShading: shade, shapeColor: color))
-                    }
-                }
-            }
-        }
-        model = SetGameModel<SetCard>(numberOfCards: cards.count, cardCreator: { (cardNo: Int) -> SetCard in
-            return cards[cardNo]
-        })
+        model = SetGameModel()
     }
     
-    func getCard(index: Int) -> SetCard {
-        return model.cards[index].content
+    // MARK: - Intents
+    
+    func choose(card: SetGameModel.Card) {
+        model.choose(card: card)
     }
+    
+    func drawThree() {
+        model.drawThree()
+    }
+    
 }
-
-struct SetCard {
-    
-    enum ShapeStyles: CaseIterable{
-        case Squiggle
-        case Oval
-        case Diamond
-    }
-    enum ShapeShadings: CaseIterable {
-        case Solid
-        case Striped
-        case Open
-    }
-    enum ShapeColors: CaseIterable {
-        case Red
-        case Green
-        case Purple
-    }
-    
-    var numberOfShapes: Int
-    var shapeStyle: ShapeStyles
-    var shapeShading: ShapeShadings
-    var shapeColor: ShapeColors
-}
-

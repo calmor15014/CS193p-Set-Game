@@ -8,10 +8,25 @@
 import SwiftUI
 
 struct ContentView: View {
-    var viewmodel: SetGame
+    @ObservedObject var viewmodel: SetGame
     var body: some View {
-        Grid(viewmodel.onScreenCards) {
-            SetCardView(card: $0.content)
+        VStack {
+            Grid(viewmodel.cardsOnScreen) { card in
+                SetCardView(card: card)
+                    .padding(5)
+                    .onTapGesture {
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            viewmodel.choose(card: card)
+                        }
+                    }
+            }
+            Divider()
+            HStack {
+                Spacer()
+                Button("Draw") {
+                    viewmodel.drawThree()
+                }.padding()
+            }
         }
     }
 }

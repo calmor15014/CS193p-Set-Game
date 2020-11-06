@@ -41,7 +41,7 @@ struct Grid<Item, ItemView>: View where Item: Identifiable, ItemView: View {
     // would be better to simplify functions but still call GridLayout separately
     var body: some View {
         GeometryReader { geometry in
-            let layout = GridLayout(itemCount: items.count, in: geometry.size)
+            let layout = GridLayout(itemCount: items.count, withAspectRatio: 0.65, in: geometry.size)
             ForEach(items) { item in
                 let index = items.firstIndex(matching: item)!
                 viewForItem(item)

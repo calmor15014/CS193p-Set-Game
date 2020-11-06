@@ -18,3 +18,14 @@ extension Array where Element: Identifiable {
         return nil
     }
 }
+
+extension Array where Element: Numeric {
+    /// Returns the sum of all elements in the array
+    func sum() -> Element {
+        var total: Element = 0
+        for element in self {
+            total += element
+        }
+        return total
+    }
+}

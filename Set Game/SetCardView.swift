@@ -8,81 +8,93 @@
 import SwiftUI
 
 struct SetCardView: View {
-    var card: SetCard
+    var card: SetGameModel.Card
     var body: some View {
         ZStack {
+            if card.isSelected {
+                RoundedRectangle(cornerRadius: 15).foregroundColor(.gray).opacity(0.5).offset(x:4, y: 4).transition(.opacity)
+            }
             RoundedRectangle(cornerRadius: 15).foregroundColor(.white)
+            if card.isSelected {
+                RoundedRectangle(cornerRadius: 15)
+                    .stroke(lineWidth: cardBorderLineWidthSelected).foregroundColor(cardBorderSelected)
+                    .opacity(0.5).transition(.opacity)
+            }
             RoundedRectangle(cornerRadius: 15).stroke(lineWidth: cardBorderLineWidth).foregroundColor(cardBorder)
-            card(content: card)
-                .foregroundColor(shapeColor(content: card.shapeColor))
-        }.padding(cardPadding)
+                    .opacity(0.5)
+            cardBody()
+                .foregroundColor(shapeColor(colorValue: card.color))
+                .padding(cardPadding)
+        }
     }
     
     @ViewBuilder
-    private func card(content: SetCard) -> some View {
-        switch content.numberOfShapes {
-        case 3:
+    private func cardBody() -> some View {
+        switch card.number {
+        case .value3:
             VStack{
-                cardShape(content: content)
-                cardShape(content: content)
-                cardShape(content: content)
-            }.padding()
-        case 2:
+                cardShape(shapeValue: card.shape, shadingValue: card.style)
+                cardShape(shapeValue: card.shape, shadingValue: card.style)
+                cardShape(shapeValue: card.shape, shadingValue: card.style)
+            }
+        case .value2:
             VStack {
-                cardShape(content: content)
-                cardShape(content: content)
-            }.padding()
-        default:
-            cardShape(content: content).padding()
+                cardShape(shapeValue: card.shape, shadingValue: card.style)
+                cardShape(shapeValue: card.shape, shadingValue: card.style)
+            }
+        case .value1:
+            cardShape(shapeValue: card.shape, shadingValue: card.style)
         }
     }
 
     @ViewBuilder
-    private func cardShape(content: SetCard) -> some View {
-        let shading = content.shapeShading
-        switch content.shapeStyle {
-        case .Oval:
-            shapeShading(shape: Oval(), shading: shading)
-        case .Squiggle:
-            shapeShading(shape: Squiggle(), shading: shading)
-        case .Diamond:
-            shapeShading(shape: Diamond(), shading: shading)
+    private func cardShape(shapeValue: SetCardValues, shadingValue: SetCardValues) -> some View {
+        switch shapeValue {
+        case .value1:
+            shapeShading(shape: Oval(), shadingValue: shadingValue)
+        case .value2:
+            shapeShading(shape: Squiggle(), shadingValue: shadingValue)
+        case .value3:
+            shapeShading(shape: Diamond(), shadingValue: shadingValue)
         }
     }
 
     @ViewBuilder
-    private func shapeShading<setShape>(shape: setShape, shading: SetCard.ShapeShadings) -> some View where setShape: Shape{
-        switch shading {
-        case .Open:
+    private func shapeShading<setShape>(shape: setShape, shadingValue: SetCardValues) -> some View where setShape: Shape{
+        switch shadingValue {
+        case .value1:
             shape.stroke()
-        case .Solid:
+        case .value2:
             shape.fill()
-        case .Striped:
-            shape.fill().opacity(0.3)
+        case .value3:
+            shape.fill().opacity(stripedOpacity)
         }
     }
 
-    private func shapeColor(content: SetCard.ShapeColors) -> Color {
-        switch content {
-        case .Green:
+    private func shapeColor(colorValue: SetCardValues) -> Color {
+        switch colorValue {
+        case .value1:
             return .green
-        case .Red:
+        case .value2:
             return .red
-        case .Purple:
+        case .value3:
             return .purple
         }
     }
     
     // MARK: - Drawing Constants
     private let cardPadding: CGFloat = 5
-    private let cardBorderLineWidth: CGFloat = 2
+    private let cardBorderLineWidth: CGFloat = 1
+    private let cardBorderLineWidthSelected: CGFloat = 1
     private let cardBorder = Color.blue
+    private let cardBorderSelected = Color.blue
+    private let stripedOpacity: Double = 0.3
 }
 
 
 
-struct SetCardView_Previews: PreviewProvider {
-    static var previews: some View {
-        SetCardView(card: SetCard(numberOfShapes: 3, shapeStyle: .Oval, shapeShading: .Striped, shapeColor: .Purple))
-    }
-}
+//struct SetCardView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        SetCardView(card: SetCard(numberOfShapes: 3, shapeStyle: .Oval, shapeShading: .Striped, shapeColor: .Purple))
+//    }
+//}
