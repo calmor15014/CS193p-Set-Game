@@ -20,7 +20,7 @@ extension Array where Element: Identifiable {
 }
 
 extension Array where Element: Numeric {
-    /// Returns the sum of all elements in the array
+    /// Returns the sum of all elements in an array of numeric elements
     func sum() -> Element {
         var total: Element = 0
         for element in self {

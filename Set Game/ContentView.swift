@@ -22,10 +22,13 @@ struct ContentView: View {
             }
             Divider()
             HStack {
+                Button("New Game") {
+                    viewmodel.newGame()
+                }.padding()
                 Spacer()
                 Button("Draw") {
                     viewmodel.drawThree()
-                }.padding()
+                }.padding().disabled(!viewmodel.cardsRemaining)
             }
         }
     }

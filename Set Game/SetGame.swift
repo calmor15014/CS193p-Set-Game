@@ -18,8 +18,16 @@ class SetGame: ObservableObject {
     }
     
     var cardsOnScreen: Array<SetGameModel.Card> {
-        model.cards.filter { card in
-            card.isDisplayed
+        var cards = model.cards.filter { card in
+            card.displayPosition != nil
+        }
+        cards.sort(by: {$0.displayPosition! < $1.displayPosition! })
+        return cards
+    }
+    
+    var cardsRemaining: Bool {
+        get {
+            return model.cardsInDeck > 0
         }
     }
     
@@ -34,7 +42,10 @@ class SetGame: ObservableObject {
     }
     
     func drawThree() {
-        model.drawThree()
+        model.checkAndDrawThree()
     }
     
+    func newGame() {
+        model = SetGameModel()
+    }
 }

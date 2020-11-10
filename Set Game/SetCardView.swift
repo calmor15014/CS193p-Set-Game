@@ -11,17 +11,30 @@ struct SetCardView: View {
     var card: SetGameModel.Card
     var body: some View {
         ZStack {
-            if card.isSelected {
-                RoundedRectangle(cornerRadius: 15).foregroundColor(.gray).opacity(0.5).offset(x:4, y: 4).transition(.opacity)
-            }
-            RoundedRectangle(cornerRadius: 15).foregroundColor(.white)
-            if card.isSelected {
-                RoundedRectangle(cornerRadius: 15)
+            switch card.status {
+            case .isSelected:
+                RoundedRectangle(cornerRadius: 10).foregroundColor(.gray).opacity(0.6).offset(x:4, y: 4).transition(.opacity)
+                RoundedRectangle(cornerRadius: 10).foregroundColor(.white).transition(.identity)
+                RoundedRectangle(cornerRadius: 10)
                     .stroke(lineWidth: cardBorderLineWidthSelected).foregroundColor(cardBorderSelected)
                     .opacity(0.5).transition(.opacity)
-            }
-            RoundedRectangle(cornerRadius: 15).stroke(lineWidth: cardBorderLineWidth).foregroundColor(cardBorder)
+            case .isSelectedInSet:
+                RoundedRectangle(cornerRadius: 10).foregroundColor(.gray).opacity(0.6).offset(x:4, y: 4).transition(.opacity)
+                RoundedRectangle(cornerRadius: 10).foregroundColor(.yellow).transition(.identity)
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(lineWidth: cardBorderLineWidthSelected).foregroundColor(cardBorderSelected)
+                    .opacity(0.5).transition(.opacity)
+            case .isSelectedInFailedSet:
+                RoundedRectangle(cornerRadius: 10).foregroundColor(.gray).opacity(0.6).offset(x:4, y: 4).transition(.opacity)
+                RoundedRectangle(cornerRadius: 10).foregroundColor(.red).transition(.identity)
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(lineWidth: cardBorderLineWidthSelected).foregroundColor(cardBorderSelected)
+                    .opacity(0.5).transition(.opacity)
+            default:
+                RoundedRectangle(cornerRadius: 10).foregroundColor(Color(red: 0.965, green: 0.965, blue: 1.0)).transition(.identity)
+                RoundedRectangle(cornerRadius: 10).stroke(lineWidth: cardBorderLineWidth).foregroundColor(cardBorder)
                     .opacity(0.5)
+            }
             cardBody()
                 .foregroundColor(shapeColor(colorValue: card.color))
                 .padding(cardPadding)
@@ -85,7 +98,7 @@ struct SetCardView: View {
     // MARK: - Drawing Constants
     private let cardPadding: CGFloat = 5
     private let cardBorderLineWidth: CGFloat = 1
-    private let cardBorderLineWidthSelected: CGFloat = 1
+    private let cardBorderLineWidthSelected: CGFloat = 2
     private let cardBorder = Color.blue
     private let cardBorderSelected = Color.blue
     private let stripedOpacity: Double = 0.3
