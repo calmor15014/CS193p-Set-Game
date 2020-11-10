@@ -41,11 +41,19 @@ class SetGame: ObservableObject {
         model.choose(card: card)
     }
     
+    // Once view is set up, draw 12 cards to start the game
+    func startGame() {
+        for _ in 0...3 {
+            drawThree()
+        }
+    }
+    
     func drawThree() {
         model.checkAndDrawThree()
     }
     
     func newGame() {
         model = SetGameModel()
+        startGame()
     }
 }

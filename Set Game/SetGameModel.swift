@@ -9,16 +9,7 @@ import Foundation
 
 struct SetGameModel {
     private(set) var cards: Array<Card>
-    
-    private var highestDisplayPosition: Int //{
-//        var max = 0
-//        for card in cards.filter({card in card.displayPosition != nil}) {
-//            if card.displayPosition! > max {
-//                max = card.displayPosition!
-//            }
-//        }
-//        return max
-//    }
+    private var highestDisplayPosition: Int = 0
     
     /// The next card available to from the deck
     private var indexOfNextCardInDeck: Int? {
@@ -35,8 +26,9 @@ struct SetGameModel {
     //MARK: - Initializer
     
     // A game of Set has 81 cards, which have four different features, each of which have three possibilities (values)
-    // It is not necessary to have a card Creator as in Memorize, since those rules are a fixed part of the game
-    // How the ViewModel and View eventually display those features and values is model independent
+    // It is not necessary to have a card creator closure as in Memorize, since those rules are a fixed part of the game
+    // How the ViewModel and View eventually display those features and values is model independent, shapes and colors not
+    // stored on the cards themselves.
     init() {
         // Start the cards array
         cards = Array<Card>()
@@ -56,20 +48,13 @@ struct SetGameModel {
         
         // Shuffle the cards in the deck
         cards.shuffle()
-        
-        // Set the first 12 cards of the deck to be displayed, after the shuffle
-        for index in 0..<12 {
-            cards[index].displayPosition = index
-        }
-        // Set the highest display position right now (drawThree might increase it later)
-        highestDisplayPosition = 12
     }
     
     mutating func choose(card: Card) {
         // Make sure we can find the card
         if let chosenCard = cards.firstIndex(matching: card) {
             // Get all of the selected cards
-            let selectedCards = cards.filter { card in
+            var selectedCards = cards.filter { card in
                 card.isSelected
             }
             // Select / deselect if less than three cards are currently selected
@@ -78,13 +63,19 @@ struct SetGameModel {
                 cards[chosenCard].isSelected = !cards[chosenCard].isSelected
                 // if this is now the third card selected, test for set and update cards
                 if selectedCards.count == 2 && cards[chosenCard].isSelected {
-                    testSet()
+                    selectedCards.append(cards[chosenCard])
+                    guard let validSet = testSet(cardsToTest: selectedCards) else { return }
+                    for card in selectedCards {
+                        if let cardIndex = cards.firstIndex(matching: card) {
+                            cards[cardIndex].inSet = validSet
+                        }
+                    }
                 }
-            // Selection occurs after three are already selected
+            // If three are already selected...
             } else {
-                // If there is a set, all of them are in a set, so check the first one
+                // If there is a set, all of them are in a set, so check one
                 // If in a set, remove from selected cards, add new cards, and select one that was touched unless it was in the set
-                if selectedCards[0].inSet != nil && selectedCards[0].inSet == true {
+                if selectedCards[0].status == .isSelectedInSet {
                     // Get three more cards, replacing the set
                     checkAndDrawThree()
                     // If card selected was not one that was in a set, select it now
@@ -105,16 +96,14 @@ struct SetGameModel {
         }
     }
     
-    private mutating func testSet() {
-        let chosenCards = cards.indices.filter { cards[$0].isSelected }
-        
+    private func testSet(cardsToTest: Array<Card>) -> Bool? {
         // Only check for sets if there are 3 chosen cards
-        guard chosenCards.count == 3  else { return }
+        guard cardsToTest.count == 3  else { return nil }
         
         // Get the raw values (for checkSet's math)
         var featureArray = Array<Array<Int>>()
-        for index in chosenCards {
-            featureArray.append(cards[index].rawFeatureArray)
+        for card in cardsToTest {
+            featureArray.append(card.rawFeatureArray)
         }
         
         // Test each feature in the chosen cards one at a time to determine if it is a valid set
@@ -124,15 +113,10 @@ struct SetGameModel {
             if !test { break }  // Leave if we identify it is not a set
         }
         
-        // This should probably be elsewhere..
-        
-        // TODO: - move this so this function doesn't have to mutate
-        for index in chosenCards {
-            cards[index].inSet = test
-        }
+        return test
     }
     
-    func checkSet(values: Array<Int>) -> Bool {
+    private func checkSet(values: Array<Int>) -> Bool {
         // Make sure there are three values
         if values.count != 3 {
             return false
@@ -145,7 +129,7 @@ struct SetGameModel {
     mutating func checkAndDrawThree() {
         // Determine if we have a selected set of cards
         let selectedSetCards = cards.filter { card in
-            card.isSelected && card.inSet != nil && card.inSet == true
+            card.status == .isSelectedInSet
         }
         // If so, get rid of them, then add the three
         if selectedSetCards.count == 3 {
