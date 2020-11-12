@@ -11,29 +11,27 @@ struct SetCardView: View {
     var card: SetGameModel.Card
     var body: some View {
         ZStack {
+            // Card Background
+            RoundedRectangle(cornerRadius: cardCornerRadius).foregroundColor(.white).transition(.identity)
             switch card.status {
             case .isSelected:
-                RoundedRectangle(cornerRadius: 10).foregroundColor(.gray).opacity(0.6).offset(x:4, y: 4).transition(.opacity)
-                RoundedRectangle(cornerRadius: 10).foregroundColor(.white).transition(.identity)
-                RoundedRectangle(cornerRadius: 10)
+                // Card Border - selected
+                RoundedRectangle(cornerRadius: cardCornerRadius)
                     .stroke(lineWidth: cardBorderLineWidthSelected).foregroundColor(cardBorderSelected)
-                    .opacity(0.5).transition(.opacity)
+                    .transition(.opacity)
             case .isSelectedInSet:
-                RoundedRectangle(cornerRadius: 10).foregroundColor(.gray).opacity(0.6).offset(x:4, y: 4).transition(.opacity)
-                RoundedRectangle(cornerRadius: 10).foregroundColor(.yellow).transition(.identity)
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(lineWidth: cardBorderLineWidthSelected).foregroundColor(cardBorderSelected)
-                    .opacity(0.5).transition(.opacity)
+                // Card Border - highlighted
+                RoundedRectangle(cornerRadius: cardCornerRadius)
+                    .stroke(lineWidth: cardBorderLineWidthSelected).foregroundColor(cardBorderSet)
+                    .transition(.opacity)
             case .isSelectedInFailedSet:
-                RoundedRectangle(cornerRadius: 10).foregroundColor(.gray).opacity(0.6).offset(x:4, y: 4).transition(.opacity)
-                RoundedRectangle(cornerRadius: 10).foregroundColor(.red).transition(.identity)
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(lineWidth: cardBorderLineWidthSelected).foregroundColor(cardBorderSelected)
-                    .opacity(0.5).transition(.opacity)
+                // Card Border - highlighted
+                RoundedRectangle(cornerRadius: cardCornerRadius)
+                    .stroke(lineWidth: cardBorderLineWidthSelected).foregroundColor(cardBorderFailedSet)
+                    .transition(.opacity)
             default:
-                RoundedRectangle(cornerRadius: 10).foregroundColor(Color(red: 0.965, green: 0.965, blue: 1.0)).transition(.identity)
-                RoundedRectangle(cornerRadius: 10).stroke(lineWidth: cardBorderLineWidth).foregroundColor(cardBorder)
-                    .opacity(0.5)
+                // Card Border - normal
+                RoundedRectangle(cornerRadius: cardCornerRadius).stroke(lineWidth: cardBorderLineWidth).foregroundColor(cardBorderNormal)
             }
             cardBody()
                 .foregroundColor(shapeColor(colorValue: card.color))
@@ -96,18 +94,22 @@ struct SetCardView: View {
     }
     
     // MARK: - Drawing Constants
+    private let cardCornerRadius: CGFloat = 10
     private let cardPadding: CGFloat = 5
     private let cardBorderLineWidth: CGFloat = 1
-    private let cardBorderLineWidthSelected: CGFloat = 2
-    private let cardBorder = Color.blue
-    private let cardBorderSelected = Color.blue
+    private let cardBorderLineWidthSelected: CGFloat = 6
+    private let cardBorderNormal = Color.blue
+    private let cardBorderSelected = Color.yellow
+    private let cardBorderSet = Color.green
+    private let cardBorderFailedSet = Color.red
     private let stripedOpacity: Double = 0.3
 }
 
 
 
-//struct SetCardView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SetCardView(card: SetCard(numberOfShapes: 3, shapeStyle: .Oval, shapeShading: .Striped, shapeColor: .Purple))
-//    }
-//}
+struct SetCardView_Previews: PreviewProvider {
+    static var previews: some View {
+        let card = SetGameModel.Card(id: 1, number: .value1, shape: .value1, color: .value1, style: .value1, displayPosition: 1, isSelected: true, inSet: true)
+        SetCardView(card: card).padding()
+    }
+}

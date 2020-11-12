@@ -16,7 +16,7 @@ struct ContentView: View {
                     SetCardView(card: card)
                         .padding(5)
                         .onTapGesture {
-                            withAnimation(.easeInOut(duration: card.status == .isDisplayed ? 0.3 : 0.75)) {
+                            withAnimation(.easeInOut(duration: card.status == .isSelected || card.status == .isDisplayed ? 0.2 : 0.75)) {
                                 viewmodel.choose(card: card)
                             }
                         }.transition(AnyTransition.offset(randomSourceLocation(in: geometry.size)))
@@ -26,20 +26,28 @@ struct ContentView: View {
                     }
                 }
                 Divider()
-                HStack {
-                    Button("New Game") {
+                ZStack {
+                    HStack {
+                        Button("New Game") {
+                            withAnimation(.easeInOut(duration: 1.0)) {
+                                viewmodel.newGame()
+                            }
+                        }.padding()
+                        .transition(AnyTransition.offset(randomSourceLocation(in: geometry.size)))
+                        Spacer()
+                        Button("Draw") {
+                            withAnimation(.easeInOut(duration: 1.0)) {
+                                viewmodel.drawThree()
+                            }
+                        }.padding().disabled(!viewmodel.cardsRemaining)
+                        .transition(AnyTransition.offset(randomSourceLocation(in: geometry.size)))
+                    }
+                    Text("🆓").onLongPressGesture {
                         withAnimation(.easeInOut(duration: 1.0)) {
-                            viewmodel.newGame()
+                            viewmodel.cheat()
                         }
-                    }.padding()
-                    .transition(AnyTransition.offset(randomSourceLocation(in: geometry.size)))
+                    }.padding().foregroundColor(.red)
                     Spacer()
-                    Button("Draw") {
-                        withAnimation(.easeInOut(duration: 1.0)) {
-                            viewmodel.drawThree()
-                        }
-                    }.padding().disabled(!viewmodel.cardsRemaining)
-                    .transition(AnyTransition.offset(randomSourceLocation(in: geometry.size)))
                 }
             }
         }
@@ -65,7 +73,6 @@ struct ContentView: View {
             }
         }
     }
-    
 }
 
 

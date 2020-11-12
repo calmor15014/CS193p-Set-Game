@@ -17,7 +17,7 @@ struct SetGameModel {
     }
     
     /// Number of cards remaining in the deck (not in play or in a matched set)
-    var cardsInDeck: Int {
+    var numberOfCardsInDeck: Int {
         get {
             return cards.indices.filter({ cards[$0].status == .inDeck }).count
         }
@@ -63,21 +63,24 @@ struct SetGameModel {
                 cards[chosenCard].isSelected = !cards[chosenCard].isSelected
                 // if this is now the third card selected, test for set and update cards
                 if selectedCards.count == 2 && cards[chosenCard].isSelected {
+                    // Add it to the running list of selected cards
                     selectedCards.append(cards[chosenCard])
+                    // Test to see if the cards are a set
                     guard let validSet = testSet(cardsToTest: selectedCards) else { return }
+                    // Set their .inSet value to match the result
                     for card in selectedCards {
                         if let cardIndex = cards.firstIndex(matching: card) {
                             cards[cardIndex].inSet = validSet
                         }
                     }
                 }
-            // If three are already selected...
+            // However, if three are already selected...
             } else {
-                // If there is a set, all of them are in a set, so check one
+                // If there is a set, all of them are in a set, so check the first one
                 // If in a set, remove from selected cards, add new cards, and select one that was touched unless it was in the set
                 if selectedCards[0].status == .isSelectedInSet {
                     // Get three more cards, replacing the set
-                    checkAndDrawThree()
+                    replaceSetOrDraw()
                     // If card selected was not one that was in a set, select it now
                     cards[chosenCard].isSelected = cards[chosenCard].inSet == nil
                 // cards weren't in a set
@@ -88,6 +91,7 @@ struct SetGameModel {
                     for card in selectedCards {
                         if let changingCard = cards.firstIndex(matching: card) {
                             cards[changingCard].isSelected = changingCard == chosenCard
+                            // Reset the "in failed set" status
                             cards[changingCard].inSet = nil
                         }
                     }
@@ -126,7 +130,7 @@ struct SetGameModel {
     }
     
     /// Select the next three cards to be shown, replacing a currently-selected set if necessary
-    mutating func checkAndDrawThree() {
+    mutating func replaceSetOrDraw() {
         // Determine if we have a selected set of cards
         let selectedSetCards = cards.filter { card in
             card.status == .isSelectedInSet
@@ -148,8 +152,6 @@ struct SetGameModel {
         }
     }
     
-
-    
     /// Select the next three cards to be shown
     private mutating func drawThree() {
         // Show the next three cards
@@ -160,6 +162,31 @@ struct SetGameModel {
             highestDisplayPosition += 1
             cards[index].displayPosition = highestDisplayPosition
         }
+    }
+    
+    var isSetOnScreen: Bool {
+        get {
+            return findSetOnScreen() != nil
+        }
+    }
+    
+    func findSetOnScreen() -> Array<Card>? {
+        let onScreenCards = cards.filter({ card in card.displayPosition != nil })
+        if onScreenCards.count == 0 { return nil }
+        
+        // Loop all first cards first
+        for firstCardIndex in 0..<onScreenCards.indices.count - 2{
+            // Loop from next card beyond
+            for secondCardIndex in firstCardIndex + 1..<onScreenCards.indices.count - 1 {
+                // Get the rest of the cards
+                for thirdCardIndex in secondCardIndex + 1..<onScreenCards.indices.count {
+                    if testSet(cardsToTest: [onScreenCards[firstCardIndex], onScreenCards[secondCardIndex], onScreenCards[thirdCardIndex]]) == true {
+                        return [onScreenCards[firstCardIndex], onScreenCards[secondCardIndex], onScreenCards[thirdCardIndex]]
+                    }
+                }
+            }
+        }
+        return nil
     }
     
     struct Card: Identifiable {
@@ -197,7 +224,7 @@ struct SetGameModel {
                 }
             } else {
                 if inSet != nil && inSet == true {
-                    return .inSet
+                    return .inDiscardPile
                 } else {
                     return .inDeck
                 }
@@ -205,12 +232,12 @@ struct SetGameModel {
         }
         
         enum CardStatus {
+            case inDeck
             case isDisplayed
             case isSelected
-            case inSet
             case isSelectedInFailedSet
             case isSelectedInSet
-            case inDeck
+            case inDiscardPile
         }
     }
 }

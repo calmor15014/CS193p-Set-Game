@@ -27,7 +27,13 @@ class SetGame: ObservableObject {
     
     var cardsRemaining: Bool {
         get {
-            return model.cardsInDeck > 0
+            return model.numberOfCardsInDeck > 0
+        }
+    }
+    
+    var setOnScreen: Bool {
+        get {
+            return model.isSetOnScreen
         }
     }
     
@@ -48,8 +54,23 @@ class SetGame: ObservableObject {
         }
     }
     
+    func cheat() {
+        // If the last set wasn't wiped out, just leave
+        if model.cards.filter({ card in card.status == .isSelectedInSet}).count > 0 { return }
+        // See if there's a set, first
+        guard let foundCards = model.findSetOnScreen() else { return }
+        // Deselct anything that is already selected
+        for card in model.cards.filter({ card in card.isSelected }) {
+            model.choose(card: card)
+        }
+        // Then, select the cards in the set
+        for card in foundCards {
+            model.choose(card: card)
+        }
+    }
+    
     func drawThree() {
-        model.checkAndDrawThree()
+        model.replaceSetOrDraw()
     }
     
     func newGame() {
