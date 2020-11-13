@@ -64,6 +64,35 @@ struct Oval: Shape {
     }
 }
 
+// CS193p Spring 2020 Homework 3 Extra Credit 4 - striped Shading
+/// Draws vertical lines at a fixed spacing distance, in the full rect space
+///
+/// Used to add a striped fill to any custom shape.
+///
+/// Requires use of ViewModifier `.stroke()` for lines to appear, add the shape with `.stroke()` above it in a `ZStack` to trace outside if desired.
+///````
+///    ZStack {
+///        StripedShadingRect().stroke().clipShape(RoundedRectangle())
+///        RoundedRectangle().stroke()
+///    }
+///````
+/// - Parameter spacing: space between lines, not ignoring line width
+struct StripedShadingRect: Shape {
+
+    var spacing: CGFloat = 2.5
+    func path(in rect: CGRect) -> Path {
+        let start = CGPoint(x: rect.minX, y: rect.minY)
+        
+        var p = Path()
+        p.move(to: start)
+        while p.currentPoint!.x < rect.maxX {
+            p.addLine(to: CGPoint(x: p.currentPoint!.x, y: rect.maxY))
+            p.move(to: CGPoint(x: p.currentPoint!.x + spacing, y: rect.minY))
+        }
+        return p
+    }
+}
+
 // Extra Credit 3 for the squiggle
 // Code modified from SwiftUI Tutorials
 // https://developer.apple.com/tutorials/swiftui/drawing-paths-and-shapes
@@ -119,13 +148,11 @@ struct SetCardShapes_Previews: PreviewProvider {
         VStack {
             Squiggle()
             Oval(aspectRatio: 4)
-            Diamond().foregroundColor(.red)
-            Diamond().foregroundColor(.red)
-            Diamond().foregroundColor(.red)
-            Diamond().foregroundColor(.red)
-            Diamond().foregroundColor(.red)
-            Diamond().foregroundColor(.red)
-            Diamond().foregroundColor(.red)
+            Diamond().foregroundColor(.blue)
+            ZStack{
+                StripedShadingRect().stroke().clipShape(Oval(aspectRatio: 5))
+                Oval(aspectRatio: 5).stroke(lineWidth: 2)
+            }
     
         }.padding()
     }

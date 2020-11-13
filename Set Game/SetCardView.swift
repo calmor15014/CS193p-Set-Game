@@ -78,7 +78,10 @@ struct SetCardView: View {
         case .value2:
             shape.fill()
         case .value3:
-            shape.fill().opacity(stripedOpacity)
+            ZStack {
+                StripedShadingRect().stroke().clipShape(shape)
+                shape.stroke(lineWidth: 2)
+            }
         }
     }
 
@@ -109,7 +112,7 @@ struct SetCardView: View {
 
 struct SetCardView_Previews: PreviewProvider {
     static var previews: some View {
-        let card = SetGameModel.Card(id: 1, number: .value1, shape: .value1, color: .value1, style: .value1, displayPosition: 1, isSelected: true, inSet: true)
+        let card = SetGameModel.Card(id: 1, number: .value1, shape: .value1, color: .value1, style: .value3, displayPosition: 1, isSelected: true, inSet: true)
         SetCardView(card: card).padding()
     }
 }
